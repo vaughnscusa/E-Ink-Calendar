@@ -2,3 +2,11 @@
 __pycache__/
 .env
 *.pyc
+env.yaml
+.env
+__pycache__/
+*.pyc
+venv/
+.venv/
+preview.png
+.DS_Store
