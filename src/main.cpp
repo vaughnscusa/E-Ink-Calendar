@@ -10,6 +10,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include "config.h"
+#include <WiFiClientSecure.h>
 
 #define PIN_BUSY 25
 #define PIN_RST  26
@@ -36,9 +37,12 @@ bool connectWiFi() {
 
 // 1 = new image downloaded, 0 = unchanged, -1 = error
 int fetchFrame() {
+  WiFiClientSecure client;
+  client.setInsecure();            // encrypts, but doesn't verify the server's identity (fine for testing)
+
   HTTPClient http;
-  http.begin(IMAGE_URL);
-  http.setTimeout(15000);
+  http.begin(client, IMAGE_URL);
+  http.setTimeout(45000);          // first request after idle can take 10-20 s (cold start + render)
   const char* keys[] = {"ETag"};
   http.collectHeaders(keys, 1);
   if (lastEtag[0]) http.addHeader("If-None-Match", lastEtag);
@@ -69,9 +73,12 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
+  int r = -1;
   if (connectWiFi()) {
-    int r = fetchFrame();
-    Serial.printf("fetch result: %d\n", r);
+    for (int attempt = 1; attempt <= 2 && r == -1; attempt++) {
+      r = fetchFrame();
+      Serial.printf("fetch attempt %d result: %d\n", attempt, r);
+    }
     if (r == 1) {
       SPI.begin(PIN_SCK, 12, PIN_MOSI, PIN_CS);   // SCK, MISO, MOSI, CS
       display.init(115200);
@@ -81,7 +88,8 @@ void setup() {
   }
 
   WiFi.disconnect(true);
-  esp_sleep_enable_timer_wakeup(REFRESH_INTERVAL_MINUTES * 60ULL * 1000000ULL);
+  uint64_t sleepMin = (r == -1) ? 5 : REFRESH_INTERVAL_MINUTES;
+  esp_sleep_enable_timer_wakeup(sleepMin * 60ULL * 1000000ULL);
   esp_deep_sleep_start();
 }
 

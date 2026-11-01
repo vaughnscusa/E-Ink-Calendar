@@ -5,3 +5,6 @@
 .vscode/ipch
 src/config.h
 *.bak
+config.h
+.pio/
+.DS_Store
