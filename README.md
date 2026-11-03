@@ -100,5 +100,5 @@ Display wiring is defined at the top of `src/main.cpp` (BUSY 25, RST 26, DC 27, 
 
 ## Roadmap
 
-- LiPo battery and a printed enclosure
+- LiPo battery and a printed enclosure designed in SolidWorks
 - Pin Google's root certificate in the firmware instead of `setInsecure()`
