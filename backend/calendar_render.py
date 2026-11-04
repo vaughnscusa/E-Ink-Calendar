@@ -88,11 +88,11 @@ def build_days(ics_url):
                 return t.strftime("%-I:%M").replace(":00", "")
 
             if s.strftime("%p") == e.strftime("%p"):
-                # Same am/pm on both ends: show it once, e.g. "9-10:30a"
-                time_str = f"{fmt(s)}-{fmt(e)}{e.strftime('%p')[0].lower()}"
+                # Same am/pm on both ends: show it once, e.g. "9-10:30am"
+                time_str = f"{fmt(s)}-{fmt(e)}{e.strftime('%p').lower()}"
             else:
-                # Different am/pm: show it on both, e.g. "11:30a-1p"
-                time_str = f"{fmt(s)}{s.strftime('%p')[0].lower()}-{fmt(e)}{e.strftime('%p')[0].lower()}"
+                # Different am/pm: show it on both, e.g. "11:30am-1pm"
+                time_str = f"{fmt(s)}{s.strftime('%p').lower()}-{fmt(e)}{e.strftime('%p').lower()}"
         e_date = max(e_date, s_date)
 
         item = {
