@@ -40,7 +40,7 @@ body{margin:0;width:800px;height:480px;background:#fff;color:#000;
 .head{text-align:center;padding:8px 0;font-weight:bold;font-size:18px;
       border-bottom:3px solid #000}
 .today .head{background:#000;color:#fff}
-.ev{padding:4px 5px;border-bottom:1px solid #000;font-size:13px;line-height:1.2;
+.ev{padding:4px 5px;border-bottom:1px solid #000;font-size:12px;line-height:1.2;
     word-wrap:break-word}
 .ev .t{font-weight:bold}
 .allday{background:#000;color:#fff;font-weight:bold}
@@ -83,7 +83,16 @@ def build_days(ics_url):
             if e > s and e.time() == dt.time.min:  # ends exactly at midnight
                 e_date -= dt.timedelta(days=1)
             sort_key = s.time()
-            time_str = s.strftime("%-I:%M%p").lower()
+                        # Compact time range. fmt() drops ":00", so 9:00 -> "9" and 9:30 -> "9:30"
+            def fmt(t):
+                return t.strftime("%-I:%M").replace(":00", "")
+
+            if s.strftime("%p") == e.strftime("%p"):
+                # Same am/pm on both ends: show it once, e.g. "9-10:30a"
+                time_str = f"{fmt(s)}-{fmt(e)}{e.strftime('%p')[0].lower()}"
+            else:
+                # Different am/pm: show it on both, e.g. "11:30a-1p"
+                time_str = f"{fmt(s)}{s.strftime('%p')[0].lower()}-{fmt(e)}{e.strftime('%p')[0].lower()}"
         e_date = max(e_date, s_date)
 
         item = {
